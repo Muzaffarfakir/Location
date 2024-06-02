@@ -7,7 +7,7 @@ export default function Developer() {
     let [os, setOs] = useState("");
     let [load, setLoad] = useState(false);
     function submit() {
-        axios.post("http://localhost:8000/pass", { pass }).then((data) => {
+        axios.post("https://location-back.onrender.com/pass", { pass }).then((data) => {
             console.log(data.data.mes);
             if (data.data.mes == "exist") {
                 setLoad(true);
@@ -22,7 +22,7 @@ export default function Developer() {
     }
     useEffect(() => {
        
-        fetch("http://localhost:8000/fetchingData").then((res) => res.json()).then((data) => {
+        fetch("https://location-back.onrender.com/fetchingData").then((res) => res.json()).then((data) => {
             SetD(data)
         })
     }, []);
