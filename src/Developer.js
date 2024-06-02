@@ -65,6 +65,13 @@ export default function Developer() {
                                     {el.Longitude}
 
                                 </h5>
+                                 <h3>
+                                    Time
+                                </h3>
+                                <h5>
+                                    {el.time}
+
+                                </h5>
                             </div>
                         </div>
                     })}
