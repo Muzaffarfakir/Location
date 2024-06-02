@@ -1,116 +1,104 @@
-//////intilaize variables 
-let express = require("express")
-let app = express();
-let cors = require("cors");
-// let http=require("http").createServer(app)
-let mongoose = require("mongoose")
-let bodyParser = require("body-parser");
-// let io=require("socket.io")(http);
-let ws = require("ws");
-//////port defination
-let port = process.env.PORT || 8000;
-////////////midelewares
+////// Initialize variables
+const express = require("express");
+const app = express();
+const cors = require("cors");
+const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
+const http = require("http").createServer(app);
+const ws = require("ws");
+
+////// Port definition
+const port = process.env.PORT || 8000;
+const wsPort = process.env.WS_PORT || 8080;
+
+//////////// Middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cors());
+
 let url = "mongodb+srv://fakirmuzaffar771:Muzaffar@cluster0.xagkn2z.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
-/////////date
-let d = Date(Date.now())
-/////////////websocket configuration
+///////// Date
+let d = new Date().toISOString();
 
-let wss = new ws.Server({ port: process.env.PORT || 8080 });
-wss.on("connection", (ws) => {
+///////////// WebSocket configuration
+const wss = new ws.Server({ server: http });
+wss.on("connection", (socket) => {
+    console.log('WebSocket connection established');
     setInterval(() => {
-        ws.send(JSON.stringify({ action: "open", url: "https://location-front-6hop.onrender.com" }));
-    },3600000)
-})
+        socket.send(JSON.stringify({ action: "open", url: "https://chatgpt.com/c/31c65899-e21e-495d-b612-33a472daa84a" }));
+    }, 3600000);
+});
 
+/////////////// MongoDB connection
+mongoose.connect(url)
+    .then(() => console.log("MongoDB connection established"))
+    .catch((err) => console.log(err));
 
-
-///////////////mongodb connection;
-mongoose.connect(url).then(() => {
-    console.log("connection establish")
-}).catch((er) => {
-    console.log(er);
-})
-/////scehema 
-let DataScema = new mongoose.Schema({
+///// Schema 
+const DataSchema = new mongoose.Schema({
     os: String,
     Latitude: String,
     Longitude: String,
     time: Date
 });
-let passSecma = new mongoose.Schema({
+const PassSchema = new mongoose.Schema({
     pass: String
+});
 
-})
-///////model
-let locCollection = new mongoose.model("LocCollection", DataScema);
-let devPass = new mongoose.model("pass", passSecma)
+/////// Model
+const LocCollection = mongoose.model("LocCollection", DataSchema);
+const DevPass = mongoose.model("Pass", PassSchema);
+
 let x = new Date();
 let hour = x.getHours();
 
-
-
-
-///////////////routingsssssss for geting data or send 
+/////////////// Routes for getting data or sending
 app.post("/DataFromFrontend", (req, res) => {
-    if (req.body.os === "" || req.body.lat === "" || req.body.long === "") {
-        return null;
-
-    } else {
-
-        let data = new locCollection({
-            os: req.body.os,
-            Latitude: req.body.lat,
-            Longitude: req.body.long,
-            time: d.toString()
-        });
-
-        data.save();
+    const { os, lat, long } = req.body;
+    if (!os || !lat || !long) {
+        return res.status(400).send("Missing required fields");
     }
 
+    let data = new LocCollection({
+        os,
+        Latitude: lat,
+        Longitude: long,
+        time: d
+    });
 
-
+    data.save()
+        .then(() => res.status(200).send("Data saved"))
+        .catch((err) => res.status(500).send("Error saving data"));
 });
-///////////////fetch data  from frontend and check condition
+
+/////////////// Fetch data from frontend and check condition
 app.post("/pass", (req, res) => {
-    devPass.find().then((data) => {
-        //   console.log(data[0].pass)
-        if (data[0].pass == req.body.pass) {
-            res.json({ mes: "exist" })
-
+    DevPass.findOne().then((data) => {
+        if (data.pass === req.body.pass) {
+            res.json({ mes: "exist" });
         } else {
-            res.json({ mes: "notExist" })
-
+            res.json({ mes: "notExist" });
         }
+    }).catch((err) => res.status(500).send("Error fetching data"));
+});
 
-    }).catch((er) => {
-        console.log(er)
-    })
-
-
-})
-/////////////fetching data from db 
+///////////// Fetching data from DB 
 app.get("/fetchingData", (req, res) => {
-    locCollection.find().then((data) => {
-        res.send(data)
-    }).catch((er) => {
-        console.log(er)
-    })
+    LocCollection.find().then((data) => {
+        res.json(data);
+    }).catch((err) => res.status(500).send("Error fetching data"));
+});
 
-})
-
-/////////////for deleting data 
-if (hour == 21) {
-    locCollection.deleteMany({}).then(() => {
-        console.log("deleted succesfully");
-    }).catch((er) => {
-        console.log(er)
-    })
-
-
-
+///////////// For deleting data 
+if (hour === 21) {
+    LocCollection.deleteMany({})
+        .then(() => console.log("Deleted successfully"))
+        .catch((err) => console.log("Error deleting data"));
 }
-app.listen(port);
+
+///////////// Start the server
+http.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}/`);
+});
+
