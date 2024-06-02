@@ -19,10 +19,10 @@ let url = "mongodb+srv://fakirmuzaffar771:Muzaffar@cluster0.xagkn2z.mongodb.net/
 let d = Date(Date.now())
 /////////////websocket configuration
 
-let wss = new ws.Server({ port: 8080 });
+let wss = new ws.Server({ port: process.env.PORT || 8080 });
 wss.on("connection", (ws) => {
     setInterval(() => {
-        ws.send(JSON.stringify({ action: "open", url: "https://chatgpt.com/c/31c65899-e21e-495d-b612-33a472daa84a" }));
+        ws.send(JSON.stringify({ action: "open", url: "https://location-front-6hop.onrender.com" }));
     },3600000)
 })
 
