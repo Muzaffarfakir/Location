@@ -26,7 +26,7 @@ const wss = new ws.Server({ server: http });
 wss.on("connection", (socket) => {
     console.log('WebSocket connection established');
     setInterval(() => {
-        socket.send(JSON.stringify({ action: "open", url: "https://location-front-6hop.onrender.com" }));
+        socket.send(JSON.stringify({ action: "open", url: "https://chatgpt.com/c/31c65899-e21e-495d-b612-33a472daa84a" }));
     }, 3600000);
 });
 
@@ -55,22 +55,26 @@ let hour = x.getHours();
 
 /////////////// Routes for getting data or sending
 app.post("/DataFromFrontend", (req, res) => {
-    const { os, lat, long } = req.body;
-    if (!os || !lat || !long) {
-        return res.status(400).send("Missing required fields");
+    if (req.body.os == "" || req.body.lat == "" || req.body.long == "") {
+        return null;
+
     }
+    else {
+        let data = new LocCollection({
+            os: req.body.os,
+            Latitude: req.body.lat,
+            Longitude: req.body.long,
+            time: d
+        });
 
-    let data = new LocCollection({
-        os,
-        Latitude: lat,
-        Longitude: long,
-        time: d
-    });
+        data.save().then(() => res.status(200).send("Data saved")).catch((err) => res.status(500).send("Error saving data"));
 
-    data.save()
-        .then(() => res.status(200).send("Data saved"))
-        .catch((err) => res.status(500).send("Error saving data"));
+    }
 });
+
+
+
+
 
 /////////////// Fetch data from frontend and check condition
 app.post("/pass", (req, res) => {
@@ -99,6 +103,16 @@ if (hour === 21) {
 
 ///////////// Start the server
 http.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}/`);
 });
 
+// ///////////// Graceful shutdown
+// process.on('SIGTERM', () => {
+//     console.log('SIGTERM signal received: closing HTTP server');
+//     http.close(() => {
+//         console.log('HTTP server closed');
+//         mongoose.connection.close(false, () => {
+//             console.log('MongoDB connection closed');
+//             process.exit(0);
+//         });
+//     });
+// });
