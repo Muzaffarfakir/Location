@@ -19,7 +19,7 @@ app.use(cors());
 let url = "mongodb+srv://fakirmuzaffar771:Muzaffar@cluster0.xagkn2z.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 ///////// Date
-let d = new Date().toISOString();
+let d = new Date().toString();
 
 ///////////// WebSocket configuration
 const wss = new ws.Server({ server: http });
