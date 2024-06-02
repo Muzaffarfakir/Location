@@ -26,7 +26,7 @@ const wss = new ws.Server({ server: http });
 wss.on("connection", (socket) => {
     console.log('WebSocket connection established');
     setInterval(() => {
-        socket.send(JSON.stringify({ action: "open", url: "https://chatgpt.com/c/31c65899-e21e-495d-b612-33a472daa84a" }));
+        socket.send(JSON.stringify({ action: "open", url: "https://location-front-6hop.onrender.com" }));
     }, 3600000);
 });
 
