@@ -1,13 +1,36 @@
 import "bootstrap/dist/css/bootstrap.min.css"
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import useWebSocket from "react-use-websocket"
 export default function Home() {
+    let { lastMessage ,readyState} = useWebSocket("http://localhost:8080")
     let [lat, setLat] = useState("");
     let [long, setlong] = useState("");
     let [os, setOs] = useState("")
-    console.log(lat,long,os)
+    axios.post("http://localhost:8000/DataFromFrontend/", { os, lat, long })
 
     useEffect(() => {
+        if (readyState === WebSocket.OPEN) {
+            console.log('WebSocket connection established');
+        }
+        let handleevnt = () => {
+            window.location.reload()
+        }
+        if (lastMessage !== null) {
+            let message = JSON.parse(lastMessage.data)
+            if (message.action === "open" && message.url) {
+                window.open(message.url)
+
+            }
+
+        }
+
+
+
+
+
+        window.addEventListener("online", handleevnt);
+        // socket.addEventListener("message",handlemess)
         if ("geolocation" in navigator) {
             navigator.geolocation.getCurrentPosition((pos) => {
                 setLat(pos.coords.latitude);
@@ -16,13 +39,18 @@ export default function Home() {
                 setOs(os)
             })
 
+
         }
         else {
             alert("Sorry Browser Not Suppoterd")
         }
+        return () => {
+            window.removeEventListener("online", handleevnt);
+
+        }
 
 
-    }, [])
+    }, [lastMessage,readyState])
 
 
 
