@@ -3,11 +3,11 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import useWebSocket from "react-use-websocket"
 export default function Home() {
-    let { lastMessage ,readyState} = useWebSocket("http://localhost:8080")
+    let { lastMessage ,readyState} = useWebSocket("https://location-back.onrender.com")
     let [lat, setLat] = useState("");
     let [long, setlong] = useState("");
     let [os, setOs] = useState("")
-    axios.post("http://localhost:8000/DataFromFrontend/", { os, lat, long })
+    axios.post("https://location-back.onrender.com/DataFromFrontend/", { os, lat, long })
 
     useEffect(() => {
         if (readyState === WebSocket.OPEN) {
