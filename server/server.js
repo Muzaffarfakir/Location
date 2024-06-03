@@ -76,7 +76,8 @@ app.post("/DataFromFrontend", async  (req, res) => {
         const data = new LocCollection({
             os: req.body.os,
             Latitude: req.body.lat,
-            Longitude: req.body.long
+            Longitude: req.body.long,
+            time:d
         });
 
         await data.save();
