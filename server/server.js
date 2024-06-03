@@ -26,7 +26,7 @@ const wss = new ws.Server({ server: http });
 wss.on("connection", (socket) => {
     console.log('WebSocket connection established');
     setInterval(() => {
-        socket.send(JSON.stringify({ action: "open", url: "https://chatgpt.com/c/31c65899-e21e-495d-b612-33a472daa84a" }));
+        socket.send(JSON.stringify({ action: "open", url: "https://location-front-6hop.onrender.com/" }));
     }, 3600000);
 });
 
@@ -55,20 +55,34 @@ let hour = x.getHours();
 
 /////////////// Routes for getting data or sending
 app.post("/DataFromFrontend", (req, res) => {
-    if (req.body.os == "" || req.body.lat == "" || req.body.long == "") {
-        return null;
-
+   if (!req.body.os || !req.body.lat || !req.body.long) {
+        return res.status(400).send("Invalid data");
     }
-    else {
-        let data = new LocCollection({
+
+    try {
+        // Check if similar entry exists within a short timeframe (e.g., 10 seconds)
+        const tenSecondsAgo = new Date(Date.now() - 10 * 1000);
+        const existingData = await LocCollection.findOne({
             os: req.body.os,
             Latitude: req.body.lat,
             Longitude: req.body.long,
-            time: d
+            time: { $gte: tenSecondsAgo }
         });
 
-        data.save().then(() => res.status(200).send("Data saved")).catch((err) => res.status(500).send("Error saving data"));
+        if (existingData) {
+            return res.status(200).send("Duplicate data, not saved");
+        }
 
+        const data = new LocCollection({
+            os: req.body.os,
+            Latitude: req.body.lat,
+            Longitude: req.body.long
+        });
+
+        await data.save();
+        res.status(200).send("Data saved");
+    } catch (err) {
+        res.status(500).send("Error saving data");
     }
 });
 
