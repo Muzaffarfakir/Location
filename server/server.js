@@ -56,7 +56,7 @@ let hour = x.getHours();
 /////////////// Routes for getting data or sending
 app.post("/DataFromFrontend", async  (req, res) => {
    if (!req.body.os || !req.body.lat || !req.body.long) {
-        return res.status(400).send("Invalid data");
+        return null;
     }
 
     try {
