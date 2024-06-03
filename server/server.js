@@ -20,7 +20,7 @@ let url = "mongodb+srv://fakirmuzaffar771:Muzaffar@cluster0.xagkn2z.mongodb.net/
 
 ///////// Date
 let d = new Date().toString();
-
+console.log(d);
 ///////////// WebSocket configuration
 const wss = new ws.Server({ server: http });
 wss.on("connection", (socket) => {
